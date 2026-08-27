@@ -1,3 +1,4 @@
 .env
+.venv/
 models/*.pt
 __pycache__/
