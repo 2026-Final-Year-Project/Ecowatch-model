@@ -45,7 +45,7 @@ The companion [EcoWatch web application](https://github.com/2026-Final-Year-Proj
 
 <p align="center">
   <a href="https://github.com/2026-Final-Year-Project/EcoWatch">
-    <img src="https://raw.githubusercontent.com/2026-Final-Year-Project/EcoWatch/main/public/lpadImage1.png" alt="EcoWatch web application preview showing environmental detections on a map" width="820" />
+    <img src="https://raw.githubusercontent.com/2026-Final-Year-Project/EcoWatch/main/public/ecowatch-demo.png" alt="EcoWatch web application preview showing environmental detections on a map" width="820" />
   </a>
 </p>
 
