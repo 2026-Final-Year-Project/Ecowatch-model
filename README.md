@@ -113,7 +113,7 @@ The best checkpoint was selected using validation Dice and evaluated once on the
 | Test loss | **0.3060** |
 | Best epoch | **25 / 30** |
 
-These are segmentation metrics from 427 held-out SmallMinesDS images. Dice and IoU measure overlap between the predicted and labelled mining masks; higher is better. The full training history, evaluation code, and qualitative predictions are preserved in [`03_unet_training_evaluation.ipynb`](notebooks/03_unet_training_evaluation.ipynb).
+These are segmentation metrics from 427 held-out SmallMinesDS images. Dice and IoU measure overlap between the predicted and labelled mining masks; higher is better. The reusable evaluation code is in [`src/evaluation/`](src/evaluation/), while qualitative experiment outputs remain available in [`03_unet_training_evaluation.ipynb`](notebooks/03_unet_training_evaluation.ipynb).
 
 ## Repository structure
 
@@ -121,16 +121,22 @@ These are segmentation metrics from 427 held-out SmallMinesDS images. Dice and I
 Ecowatch-model/
 ├── app.py                              # FastAPI routes
 ├── assets/                             # README and demo assets
+├── configs/unet.json                   # Reproducible training configuration
 ├── models/                             # Local model checkpoints
-├── notebooks/
+├── notebooks/                          # Exploration and experiment records
 │   ├── 01_dataset_exploration.ipynb    # Inspect imagery and masks
 │   ├── 02_unet_dataset_pipeline.ipynb  # Pair and split the dataset
 │   └── 03_unet_training_evaluation.ipynb
-├── scripts/                            # Demo-site export and verification tools
+├── scripts/
+│   ├── prepare_dataset.py              # Discover pairs and export fixed splits
+│   ├── train_model.py                  # Train from the command line
+│   └── evaluate_model.py               # Evaluate a saved checkpoint
 ├── src/
-│   ├── evaluation/metrics.py           # Dice and IoU metrics
+│   ├── data/                            # TIFF preprocessing, splits, Dataset
+│   ├── evaluation/                     # Dice, IoU, loss, held-out evaluation
+│   ├── inference/                      # Checkpoint and array inference helpers
 │   ├── models/unet.py                  # 13-band U-Net architecture
-│   ├── training/train.py               # Training utilities
+│   ├── training/                       # Epoch engine and training workflow
 │   ├── utils/visualization.py          # Prediction visualisation
 │   └── ecowatch_inference.py           # Earth Engine retrieval and inference
 ├── .env.example                        # Inference configuration template
@@ -146,4 +152,21 @@ Ecowatch-model/
 
 ## Reproducing the experiment
 
-Run the notebooks in numerical order. Notebook 02 creates fixed train, validation, and test CSVs; notebook 03 trains the model, saves the best validation checkpoint, evaluates the held-out test set, and plots satellite images beside their labels and predicted masks. The SmallMinesDS dataset is not redistributed in this repository.
+The Python package is the primary implementation; the notebooks are retained as exploration and experiment records. After installing the requirements, reproduce the pipeline without Jupyter:
+
+```bash
+python -m scripts.prepare_dataset \
+  --dataset-root /path/to/SmallMinesDS \
+  --output-dir data/splits
+
+python -m scripts.train_model \
+  --train-csv data/splits/train_dataset.csv \
+  --val-csv data/splits/val_dataset.csv \
+  --output-dir experiments/unet_v1
+
+python -m scripts.evaluate_model \
+  --checkpoint experiments/unet_v1/best_model.pt \
+  --test-csv data/splits/test_dataset.csv
+```
+
+The commands use [`configs/unet.json`](configs/unet.json), select the checkpoint with the best validation Dice score, and evaluate it on the fixed test split. The SmallMinesDS dataset is not redistributed in this repository.
